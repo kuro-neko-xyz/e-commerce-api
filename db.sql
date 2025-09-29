@@ -17,8 +17,12 @@ CREATE TABLE products (
 CREATE TABLE carts (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE UNIQUE INDEX ON carts (user_id, is_active)
+WHERE is_active = TRUE;
 
 CREATE TABLE cart_items (
     id SERIAL PRIMARY KEY,
@@ -31,15 +35,7 @@ CREATE TABLE cart_items (
 
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id) ON DELETE SET NULL,
+    cart_id INT REFERENCES carts(id) ON DELETE SET NULL,
     total_amount MONEY NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE order_items (
-    id SERIAL PRIMARY KEY,
-    order_id INT REFERENCES orders(id) ON DELETE CASCADE,
-    product_id INT REFERENCES products(id) ON DELETE SET NULL,
-    quantity INT NOT NULL CHECK (quantity > 0),
-    price_at_purchase MONEY NOT NULL
 );
