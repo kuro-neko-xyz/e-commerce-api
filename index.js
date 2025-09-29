@@ -2,6 +2,11 @@ const express = require("express");
 const Client = require("pg").Client;
 require("dotenv").config();
 
+const usersRouter = require("./routes/users");
+const productsRouter = require("./routes/products");
+const cartRouter = require("./routes/cart");
+const ordersRouter = require("./routes/orders");
+
 const app = express();
 const port = 3000;
 
@@ -15,16 +20,10 @@ const client = new Client({
 
 client.connect();
 
-app.get("/", (req, res) => {
-  client.query("SELECT * FROM products", (err, result) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send("Error retrieving products");
-    } else {
-      res.json(result.rows);
-    }
-  });
-});
+app.use("/users", usersRouter);
+app.use("/products", productsRouter);
+app.use("/cart", cartRouter);
+app.use("/orders", ordersRouter);
 
 app.listen(port, () => {
   console.log(`App listening at http://localhost:${port}`);
