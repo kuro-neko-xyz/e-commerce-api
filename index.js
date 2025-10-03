@@ -1,8 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const session = require("express-session");
 const passport = require("passport");
 const crypto = require("crypto");
-const session = require("express-session");
 const Client = require("pg").Client;
 const LocalStrategy = require("passport-local");
 require("dotenv").config();
@@ -27,13 +27,36 @@ client.connect();
 
 passport.use(
   new LocalStrategy(async function verify(username, password, cb) {
-    return cb(null, { id: 1, username: "test" });
+    try {
+      const response = await client.query(
+        "SELECT * FROM users WHERE username=$1",
+        [username]
+      );
+
+      const row = response.rows[0];
+
+      if (!row) {
+        return cb(null, false, { message: "Incorrect username or password." });
+      }
+
+      if (row.password_hash !== password) {
+        return cb(null, false, { message: "Incorrect username or password." });
+      }
+
+      return cb(null, { id: row.id, username: row.username });
+    } catch (err) {
+      return cb(err);
+    }
   })
 );
 
 app.set("view engine", "ejs");
 
-app.use(bodyParser.urlencoded());
+if (process.env.NODE_ENV === "dev") {
+  app.use(bodyParser.urlencoded());
+}
+
+app.use(bodyParser.json());
 
 app.use(
   session({

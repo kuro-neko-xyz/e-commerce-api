@@ -8,13 +8,25 @@ usersRouter.post("/register", (req, res) => {});
 usersRouter.post(
   "/login",
   passport.authenticate("local", {
-    successRedirect: "/profile",
+    successRedirect: "/users/profile",
     failureRedirect: "/users/login",
+    failureMessage: true,
   })
 );
 
-usersRouter.get("/login", (req, res) => {
-  res.render("login");
-});
+if (process.env.NODE_ENV === "dev") {
+  usersRouter.get("/login", (req, res) => {
+    res.render("login", {
+      message: req.session.messages ? req.session.messages[0] : "",
+    });
+  });
+
+  usersRouter.get("/profile", (req, res) => {
+    if (!req.user) {
+      return res.redirect("/users/login");
+    }
+    res.render("profile", { user: req.user });
+  });
+}
 
 module.exports = usersRouter;
