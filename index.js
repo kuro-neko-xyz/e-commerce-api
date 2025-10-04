@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const passport = require("passport");
-const crypto = require("crypto");
+const bcrypt = require("bcrypt");
 const Client = require("pg").Client;
 const LocalStrategy = require("passport-local");
 require("dotenv").config();
@@ -23,10 +23,12 @@ const client = new Client({
   port: 5432,
 });
 
+app.locals.client = client;
+
 client.connect();
 
 passport.use(
-  new LocalStrategy(async function verify(username, password, cb) {
+  new LocalStrategy(async (username, password, cb) => {
     try {
       const response = await client.query(
         "SELECT * FROM users WHERE username=$1",
@@ -39,7 +41,9 @@ passport.use(
         return cb(null, false, { message: "Incorrect username or password." });
       }
 
-      if (row.password_hash !== password) {
+      const match = await bcrypt.compare(password, row.password_hash);
+
+      if (!match) {
         return cb(null, false, { message: "Incorrect username or password." });
       }
 
@@ -68,14 +72,14 @@ app.use(
 
 app.use(passport.authenticate("session"));
 
-passport.serializeUser(function (user, cb) {
-  process.nextTick(function () {
+passport.serializeUser((user, cb) => {
+  process.nextTick(() => {
     cb(null, { id: user.id, username: user.username });
   });
 });
 
-passport.deserializeUser(function (user, cb) {
-  process.nextTick(function () {
+passport.deserializeUser((user, cb) => {
+  process.nextTick(() => {
     return cb(null, user);
   });
 });

@@ -1,0 +1,39 @@
+<h1>Register</h1>
+<div style="color: red">
+  <p><%= message %></p>
+</div>
+<form action="/users/register" method="post">
+  <section>
+    <label for="username">Username</label>
+    <input
+      id="username"
+      name="username"
+      type="text"
+      autocomplete="username"
+      required
+      autofocus
+    />
+  </section>
+  <section>
+    <label for="email">Email</label>
+    <input
+      id="email"
+      name="email"
+      type="text"
+      autocomplete="email"
+      required
+      autofocus
+    />
+  </section>
+  <section>
+    <label for="new-password">Password</label>
+    <input
+      id="new-password"
+      name="password"
+      type="password"
+      autocomplete="new-password"
+      required
+    />
+  </section>
+  <button type="submit">Register</button>
+</form>
