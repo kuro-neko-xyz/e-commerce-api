@@ -1,6 +1,6 @@
 # Requirements
-node
-postgres
+* node
+* postgres
 
 # Installation
 On a psql shell run:
