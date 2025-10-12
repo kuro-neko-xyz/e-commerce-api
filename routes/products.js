@@ -13,17 +13,135 @@ producstsRouter.get("/", async (req, res) => {
 
     return res.json(response.rows);
   } catch (err) {
-    console.log(err);
     return res.status(500).send("Internal Server Error");
   }
 });
 
-producstsRouter.get("/:id", (req, res) => {});
+producstsRouter.get("/:id/detail", async (req, res) => {
+  if (!req.user) {
+    return res.status(403).send("Forbidden");
+  }
 
-producstsRouter.post("/create", (req, res) => {});
+  try {
+    const client = req.app.locals.client;
+    const id = req.params.id;
 
-producstsRouter.put("/:id/edit", (req, res) => {});
+    const response = await client.query(
+      "SELECT * FROM products WHERE id = $1",
+      [id]
+    );
 
-producstsRouter.delete("/:id/delete", (req, res) => {});
+    if (response.rows.length === 0) {
+      return res.status(404).send("Product Not Found");
+    }
+
+    return res.json(response.rows[0]);
+  } catch (err) {
+    return res.status(500).send("Internal Server Error");
+  }
+});
+
+producstsRouter.post("/create", async (req, res) => {
+  if (!req.user) {
+    return res.status(403).send("Forbidden");
+  }
+
+  try {
+    const client = req.app.locals.client;
+    const { name, price, stock } = req.body;
+
+    const response = await client.query(
+      "INSERT INTO products (name, price, stock) VALUES ($1, $2, $3) RETURNING *",
+      [name, price, stock]
+    );
+
+    return res.status(201).json(response.rows[0]);
+  } catch (err) {
+    return res.status(500).send("Internal Server Error");
+  }
+});
+
+producstsRouter.put("/:id/edit", async (req, res) => {
+  if (!req.user) {
+    return res.status(403).send("Forbidden");
+  }
+
+  try {
+    const client = req.app.locals.client;
+    const id = req.params.id;
+    const { name, price, stock } = req.body;
+
+    const response = await client.query(
+      "UPDATE products SET name = $1, price = $2, stock = $3 WHERE id = $4 RETURNING *",
+      [name, price, stock, id]
+    );
+
+    if (response.rows.length === 0) {
+      return res.status(404).send("Product Not Found");
+    }
+
+    return res.json(response.rows[0]);
+  } catch (err) {
+    return res.status(500).send("Internal Server Error");
+  }
+});
+
+producstsRouter.delete("/:id/delete", async (req, res) => {
+  if (!req.user) {
+    return res.status(403).send("Forbidden");
+  }
+
+  try {
+    const client = req.app.locals.client;
+    const id = req.params.id;
+
+    client.query("DELETE FROM products WHERE id = $1", [id]);
+
+    return res.status(204).send();
+  } catch (err) {
+    return res.status(500).send("Internal Server Error");
+  }
+});
+
+if (process.env.NODE_ENV === "dev") {
+  producstsRouter.get("/create", (req, res) => {
+    if (!req.user) {
+      return res.redirect("/users/login");
+    }
+    res.render("create_product");
+  });
+
+  producstsRouter.get("/:id/edit", (req, res) => {
+    if (!req.user) {
+      return res.redirect("/users/login");
+    }
+    res.render("edit_product", { id: req.params.id });
+  });
+
+  producstsRouter.post("/:id/edit", async (req, res) => {
+    if (!req.user) {
+      return res.status(403).send("Forbidden");
+    }
+
+    try {
+      const client = req.app.locals.client;
+      const id = req.params.id;
+      const { name, price, stock } = req.body;
+
+      const response = await client.query(
+        "UPDATE products SET name = $1, price = $2, stock = $3 WHERE id = $4 RETURNING *",
+        [name, price, stock, id]
+      );
+
+      if (response.rows.length === 0) {
+        return res.status(404).send("Product Not Found");
+      }
+
+      return res.json(response.rows[0]);
+    } catch (err) {
+      return res.status(500).send("Internal Server Error");
+    }
+  });
+}
 
 module.exports = producstsRouter;
