@@ -2,32 +2,15 @@
 <form action="/products/<%= id %>/edit" method="post">
   <section>
     <label for="name">Name</label>
-    <input
-      id="name"
-      name="name"
-      type="text"
-      required
-      autofocus
-    />
+    <input id="name" name="name" type="text" required autofocus />
   </section>
   <section>
     <label for="price">Price</label>
-    <input
-      id="price"
-      name="price"
-      type="number"
-      step="0.01"
-      required
-    />
+    <input id="price" name="price" type="number" step="0.01" required />
   </section>
   <section>
     <label for="stock">Stock</label>
-    <input
-      id="stock"
-      name="stock"
-      type="number"
-      required
-    />
+    <input id="stock" name="stock" type="number" required />
   </section>
   <button type="submit">Edit Product</button>
 </form>

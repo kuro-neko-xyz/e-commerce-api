@@ -4,7 +4,7 @@ const producstsRouter = express.Router();
 
 producstsRouter.get("/", async (req, res) => {
   if (!req.user) {
-    return res.status(403).send("Forbidden");
+    return res.redirect("/users/login");
   }
 
   try {
@@ -19,7 +19,7 @@ producstsRouter.get("/", async (req, res) => {
 
 producstsRouter.get("/:id/detail", async (req, res) => {
   if (!req.user) {
-    return res.status(403).send("Forbidden");
+    return res.redirect("/users/login");
   }
 
   try {
@@ -43,7 +43,7 @@ producstsRouter.get("/:id/detail", async (req, res) => {
 
 producstsRouter.post("/create", async (req, res) => {
   if (!req.user) {
-    return res.status(403).send("Forbidden");
+    return res.redirect("/users/login");
   }
 
   try {
@@ -63,7 +63,7 @@ producstsRouter.post("/create", async (req, res) => {
 
 producstsRouter.put("/:id/edit", async (req, res) => {
   if (!req.user) {
-    return res.status(403).send("Forbidden");
+    return res.redirect("/users/login");
   }
 
   try {
@@ -88,7 +88,7 @@ producstsRouter.put("/:id/edit", async (req, res) => {
 
 producstsRouter.delete("/:id/delete", async (req, res) => {
   if (!req.user) {
-    return res.status(403).send("Forbidden");
+    return res.redirect("/users/login");
   }
 
   try {
@@ -97,7 +97,7 @@ producstsRouter.delete("/:id/delete", async (req, res) => {
 
     client.query("DELETE FROM products WHERE id = $1", [id]);
 
-    return res.status(204).send();
+    return res.redirect("/products");
   } catch (err) {
     return res.status(500).send("Internal Server Error");
   }
@@ -138,6 +138,29 @@ if (process.env.NODE_ENV === "dev") {
       }
 
       return res.json(response.rows[0]);
+    } catch (err) {
+      return res.status(500).send("Internal Server Error");
+    }
+  });
+
+  producstsRouter.get("/:id/delete", async (req, res) => {
+    if (!req.user) {
+      return res.redirect("/users/login");
+    }
+    res.render("delete_product", { id: req.params.id });
+  });
+
+  producstsRouter.post("/:id/delete", async (req, res) => {
+    if (!req.user) {
+      return res.status(403).send("Forbidden");
+    }
+    try {
+      const client = req.app.locals.client;
+      const id = req.params.id;
+
+      await client.query("DELETE FROM products WHERE id = $1", [id]);
+
+      return res.redirect("/products");
     } catch (err) {
       return res.status(500).send("Internal Server Error");
     }
