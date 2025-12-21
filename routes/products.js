@@ -4,7 +4,7 @@ const producstsRouter = express.Router();
 
 producstsRouter.get("/", async (req, res) => {
   if (!req.user) {
-    return res.redirect("/users/login");
+    res.status(403).send("Forbidden");
   }
 
   try {
@@ -19,7 +19,7 @@ producstsRouter.get("/", async (req, res) => {
 
 producstsRouter.get("/:id/detail", async (req, res) => {
   if (!req.user) {
-    return res.redirect("/users/login");
+    res.status(403).send("Forbidden");
   }
 
   try {
@@ -43,7 +43,7 @@ producstsRouter.get("/:id/detail", async (req, res) => {
 
 producstsRouter.post("/create", async (req, res) => {
   if (!req.user) {
-    return res.redirect("/users/login");
+    res.status(403).send("Forbidden");
   }
 
   try {
@@ -63,7 +63,7 @@ producstsRouter.post("/create", async (req, res) => {
 
 producstsRouter.put("/:id/edit", async (req, res) => {
   if (!req.user) {
-    return res.redirect("/users/login");
+    res.status(403).send("Forbidden");
   }
 
   try {
@@ -88,7 +88,7 @@ producstsRouter.put("/:id/edit", async (req, res) => {
 
 producstsRouter.delete("/:id/delete", async (req, res) => {
   if (!req.user) {
-    return res.redirect("/users/login");
+    res.status(403).send("Forbidden");
   }
 
   try {
@@ -106,14 +106,14 @@ producstsRouter.delete("/:id/delete", async (req, res) => {
 if (process.env.NODE_ENV === "dev") {
   producstsRouter.get("/create", (req, res) => {
     if (!req.user) {
-      return res.redirect("/users/login");
+      res.status(403).send("Forbidden");
     }
     res.render("create_product");
   });
 
   producstsRouter.get("/:id/edit", (req, res) => {
     if (!req.user) {
-      return res.redirect("/users/login");
+      res.status(403).send("Forbidden");
     }
     res.render("edit_product", { id: req.params.id });
   });
@@ -145,7 +145,7 @@ if (process.env.NODE_ENV === "dev") {
 
   producstsRouter.get("/:id/delete", async (req, res) => {
     if (!req.user) {
-      return res.redirect("/users/login");
+      res.status(403).send("Forbidden");
     }
     res.render("delete_product", { id: req.params.id });
   });

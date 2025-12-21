@@ -4,7 +4,7 @@ const cartRouter = express.Router();
 
 cartRouter.post("/add-item", async (req, res) => {
   if (!req.user) {
-    return res.redirect("/users/login");
+    res.status(403).send("Forbidden");
   }
 
   try {
@@ -48,9 +48,70 @@ cartRouter.post("/add-item", async (req, res) => {
   }
 });
 
-cartRouter.delete("/remove-item", (req, res) => {});
+cartRouter.delete("/remove-item", async (req, res) => {
+  if (!req.user) {
+    res.status(403).send("Forbidden");
+  }
 
-cartRouter.get("/view", (req, res) => {});
+  try {
+    const client = req.app.locals.client;
+    const userId = req.user.id;
+
+    let cart = await client.query(
+      "SELCT * FROM cartse WHERE user_id = $1 AND is_active = TRUE",
+      [userId]
+    );
+
+    if (cart.rows.length === 0) {
+      return res.status(400).send("Cart is empty");
+    }
+
+    const doesItemExist = await client.query(
+      "SELECT * FROM cart_items WHERE cart_id = $1 AND product_id = $2",
+      [cart.rows[0].id, req.body.product_id]
+    );
+
+    if (doesItemExist.rows.length === 0) {
+      return res.status(400).send("Item not found in cart");
+    }
+
+    await client.query(
+      "DELETE FROM cart_items WHERE cart_id = $1 AND product_id = $2",
+      [cart.rows[0].id, req.body.product_id]
+    );
+  } catch (err) {
+    return res.status(500).send("Internal Server Error");
+  }
+});
+
+cartRouter.get("/view", async (req, res) => {
+  if (!req.user) {
+    res.status(403).send("Forbidden");
+  }
+
+  try {
+    const client = req.app.locals.client;
+    const userId = req.user.id;
+
+    let cart = await client.query(
+      "SELECT * FROM carts WHERE user_id = $1 AND is_active = TRUE",
+      [userId]
+    );
+
+    if (cart.rows.length !== 0) {
+      let items = await client.query(
+        "SELECT ci.product_id, p.name, ci.quantity FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.cart_id = $1",
+        [cart.rows[0].id]
+      );
+
+      return res.status(200).json({ items: items.rows });
+    } else {
+      return res.status(400).send("No active cart found");
+    }
+  } catch (err) {
+    return res.status(500).send("Internal Server Error");
+  }
+});
 
 cartRouter.post("/checkout", (req, res) => {});
 

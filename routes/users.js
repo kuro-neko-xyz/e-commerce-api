@@ -43,7 +43,7 @@ usersRouter.post(
 
 usersRouter.post("/change-password", async (req, res) => {
   if (!req.user) {
-    return res.redirect("/users/login");
+    res.status(403).send("Forbidden");
   }
 
   const { current_password, new_password, confirm_password } = req.body;
@@ -93,7 +93,7 @@ usersRouter.post("/change-password", async (req, res) => {
 
 usersRouter.post("/change-email", async (req, res) => {
   if (!req.user) {
-    return res.redirect("/users/login");
+    res.status(403).send("Forbidden");
   }
 
   const { current_password, new_email } = req.body;
@@ -144,14 +144,14 @@ if (process.env.NODE_ENV === "dev") {
 
   usersRouter.get("/profile", (req, res) => {
     if (!req.user) {
-      return res.redirect("/users/login");
+      res.status(403).send("Forbidden");
     }
     res.render("profile", { user: req.user });
   });
 
   usersRouter.get("/change-password", (req, res) => {
     if (!req.user) {
-      return res.redirect("/users/login");
+      res.status(403).send("Forbidden");
     }
     res.render("change_password", {
       message: req.session.messages ? req.session.messages[0] : "",
@@ -160,7 +160,7 @@ if (process.env.NODE_ENV === "dev") {
 
   usersRouter.get("/change-email", (req, res) => {
     if (!req.user) {
-      return res.redirect("/users/login");
+      res.status(403).send("Forbidden");
     }
     res.render("change_email", {
       message: req.session.messages ? req.session.messages[0] : "",
