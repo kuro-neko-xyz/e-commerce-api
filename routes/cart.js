@@ -44,6 +44,7 @@ cartRouter.post("/add-item", async (req, res) => {
 
     return res.status(201).send("Item added to cart");
   } catch (err) {
+    console.log(err);
     return res.status(500).send("Internal Server Error");
   }
 });
@@ -80,6 +81,7 @@ cartRouter.delete("/remove-item", async (req, res) => {
       [cart.rows[0].id, req.body.product_id]
     );
   } catch (err) {
+    console.log(err);
     return res.status(500).send("Internal Server Error");
   }
 });
@@ -109,6 +111,7 @@ cartRouter.get("/view", async (req, res) => {
       return res.status(400).send("No active cart found");
     }
   } catch (err) {
+    console.log(err);
     return res.status(500).send("Internal Server Error");
   }
 });
@@ -136,14 +139,42 @@ cartRouter.post("/checkout", async (req, res) => {
       [cart.rows[0].id]
     );
 
-    // todo: add negative stock check here
+    const products = [];
+
+    for (let item of cartItems.rows) {
+      const product = await client.query(
+        "SELECT * FROM products WHERE id = $1",
+        [item.product_id]
+      );
+
+      if (product.rows[0].stock < item.quantity) {
+        return res
+          .status(400)
+          .send(`Insufficient stock for product ID ${item.product_id}`);
+      }
+
+      products.push(product.rows[0]);
+    }
+
+    let totalAmount = 0;
 
     for (let item of cartItems.rows) {
       await client.query(
         "UPDATE products SET stock = stock - $1 WHERE id = $2",
         [item.quantity, item.product_id]
       );
+
+      const price = Number(
+        products.find((p) => p.id === item.product_id).price.slice(1)
+      );
+
+      totalAmount += price * item.quantity;
     }
+
+    await client.query(
+      "INSERT INTO orders (cart_id, total_amount) VALUES ($1, $2)",
+      [cart.rows[0].id, totalAmount]
+    );
 
     await client.query("UPDATE carts SET is_active = FALSE WHERE id = $1", [
       cart.rows[0].id,
@@ -151,6 +182,7 @@ cartRouter.post("/checkout", async (req, res) => {
 
     return res.status(200).send("Checkout successful");
   } catch (err) {
+    console.log(err);
     return res.status(500).send("Internal Server Error");
   }
 });

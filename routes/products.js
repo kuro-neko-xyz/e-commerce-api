@@ -13,6 +13,7 @@ producstsRouter.get("/", async (req, res) => {
 
     return res.json(response.rows);
   } catch (err) {
+    console.log(err);
     return res.status(500).send("Internal Server Error");
   }
 });
@@ -37,6 +38,7 @@ producstsRouter.get("/:id/detail", async (req, res) => {
 
     return res.json(response.rows[0]);
   } catch (err) {
+    console.log(err);
     return res.status(500).send("Internal Server Error");
   }
 });
@@ -57,6 +59,7 @@ producstsRouter.post("/create", async (req, res) => {
 
     return res.status(201).json(response.rows[0]);
   } catch (err) {
+    console.log(err);
     return res.status(500).send("Internal Server Error");
   }
 });
@@ -82,6 +85,7 @@ producstsRouter.put("/:id/edit", async (req, res) => {
 
     return res.json(response.rows[0]);
   } catch (err) {
+    console.log(err);
     return res.status(500).send("Internal Server Error");
   }
 });
@@ -99,6 +103,7 @@ producstsRouter.delete("/:id/delete", async (req, res) => {
 
     return res.redirect("/products");
   } catch (err) {
+    console.log(err);
     return res.status(500).send("Internal Server Error");
   }
 });
@@ -139,6 +144,7 @@ if (process.env.NODE_ENV === "dev") {
 
       return res.json(response.rows[0]);
     } catch (err) {
+      console.log(err);
       return res.status(500).send("Internal Server Error");
     }
   });
@@ -162,6 +168,7 @@ if (process.env.NODE_ENV === "dev") {
 
       return res.redirect("/products");
     } catch (err) {
+      console.log(err);
       return res.status(500).send("Internal Server Error");
     }
   });

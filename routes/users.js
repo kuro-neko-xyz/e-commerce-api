@@ -27,6 +27,7 @@ usersRouter.post("/register", (req, res) => {
       );
       return res.redirect("/users/login");
     } catch (err) {
+      console.log(err);
       return res.status(500).send("Internal Server Error");
     }
   });
@@ -86,6 +87,7 @@ usersRouter.post("/change-password", async (req, res) => {
       ]);
       return res.redirect("/users/profile");
     } catch (err) {
+      console.log(err);
       return res.status(500).send("Internal Server Error");
     }
   });
@@ -125,6 +127,7 @@ usersRouter.post("/change-email", async (req, res) => {
     ]);
     return res.redirect("/users/profile");
   } catch (err) {
+    console.log(err);
     return res.status(500).send("Internal Server Error");
   }
 });
